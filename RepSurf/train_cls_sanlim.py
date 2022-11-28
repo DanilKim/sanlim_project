@@ -34,7 +34,6 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=2800, help='Training Seed')
     parser.add_argument('--cuda_ops', action='store_true', default=False,
                         help='Whether to use cuda version operations [default: False]')
-    parser.add_argument('--num_sample', type=int, default=2500)
 
     # Training
     parser.add_argument('--batch_size', type=int, default=256, help='batch size in training [default: 64]')
@@ -196,8 +195,8 @@ def main(args):
     log_string('Load dataset ...')
     args.num_class = 3
     args.dataset = 'SanLim'
-    TRAIN_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='train')
-    VALID_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='val')
+    TRAIN_DATASET = SanLimDataLoader(root=args.data_dir, split='train')
+    VALID_DATASET = SanLimDataLoader(root=args.data_dir, split='val')
     trainDataLoader = torch.utils.data.DataLoader(TRAIN_DATASET, batch_size=args.batch_size, shuffle=True,
                                                   num_workers=args.n_workers, drop_last=True)
     validDataLoader = torch.utils.data.DataLoader(VALID_DATASET, batch_size=args.batch_size, shuffle=False,

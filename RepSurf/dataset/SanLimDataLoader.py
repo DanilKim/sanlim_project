@@ -6,9 +6,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class SanLimDataLoader(Dataset):
-  def __init__(self, root, num_sample, split='train', bg=True):
+  def __init__(self, root, split='train'):
     self.root_dir = root
-    self.n = num_sample
     self.list_dir = '../datalist'
     self.data_dir = os.path.join(self.root_dir, 'sanlim_crop_100_npy')
     txt = os.path.join(self.list_dir, '{}_crop100.csv'.format(split))
