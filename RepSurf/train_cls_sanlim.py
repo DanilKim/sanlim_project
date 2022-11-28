@@ -27,11 +27,10 @@ def parse_args():
     parser = argparse.ArgumentParser('RepSurf')
     # Basic
     parser.add_argument('--log_dir', type=str, default=None, help='experiment root')
-    parser.add_argument('--data_dir', type=str, default='./data', help='data dir')
-    parser.add_argument('--log_root', type=str, default='./log', help='log root dir')
+    parser.add_argument('--data_dir', type=str, default='/data', help='data dir')
+    parser.add_argument('--log_root', type=str, default='/data/snapshot', help='log root dir')
     parser.add_argument('--model', default='repsurf.scanobjectnn.repsurf_ssg_umb',
                         help='model file name [default: repsurf_ssg_umb]')
-    parser.add_argument('--gpus', nargs='+', type=str, default=None)
     parser.add_argument('--seed', type=int, default=2800, help='Training Seed')
     parser.add_argument('--cuda_ops', action='store_true', default=False,
                         help='Whether to use cuda version operations [default: False]')
@@ -41,11 +40,11 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=256, help='batch size in training [default: 64]')
     parser.add_argument('--optimizer', type=str, default='Adam', help='optimizer for training [Adam, SGD]')
     parser.add_argument('--scheduler', type=str, default='step', help='scheduler for training')
-    parser.add_argument('--epoch', default=500, type=int, help='number of epoch in training [default: 200]')
+    parser.add_argument('--epoch', default=100, type=int, help='number of epoch in training [default: 200]')
     parser.add_argument('--learning_rate', default=0.001, type=float, help='learning rate in training [default: 0.001]')
     parser.add_argument('--decay_rate', type=float, default=1e-4, help='decay rate [default: 1e-4]')
     parser.add_argument('--decay_step', default=10, type=int, help='number of epoch per decay [default: 20]')
-    parser.add_argument('--n_workers', type=int, default=4, help='DataLoader Workers Number [default: 1024]')
+    parser.add_argument('--n_workers', type=int, default=12, help='DataLoader Workers Number [default: 1024]')
     parser.add_argument('--init', type=str, default=None, help='initializer for model [kaiming, xavier]')
 
     # Evaluation
@@ -59,11 +58,11 @@ def parse_args():
 
     # Modeling
     parser.add_argument('--num_point', type=int, default=1024, help='Point Number [default: 1024]')
-    parser.add_argument('--return_dist', action='store_true', default=False,
+    parser.add_argument('--return_dist', action='store_true', default=True,
                         help='Whether to use signed distance [default: False]')
-    parser.add_argument('--return_center', action='store_true', default=False,
+    parser.add_argument('--return_center', action='store_true', default=True,
                         help='Whether to return center in surface abstraction [default: False]')
-    parser.add_argument('--return_polar', action='store_true', default=False,
+    parser.add_argument('--return_polar', action='store_true', default=True,
                         help='Whether to return polar coordinate in surface abstraction [default: False]')
     parser.add_argument('--group_size', type=int, default=8, help='Size of umbrella group [default: 0]')
     parser.add_argument('--umb_pool', type=str, default='sum', help='pooling for umbrella repsurf [mean, max]')
@@ -165,13 +164,10 @@ def main(args):
         print(s)
 
     '''HYPER PARAMETER'''
-    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(args.gpus)
     set_seed(args.seed)
 
     '''CREATE DIR'''
-    experiment_dir = Path(os.path.join(args.log_root, 'PointAnalysis', 'log'))
-    experiment_dir.mkdir(exist_ok=True)
-    experiment_dir = experiment_dir.joinpath('Tree')
+    experiment_dir = Path(args.log_root)
     experiment_dir.mkdir(exist_ok=True)
     if args.log_dir is None:
         timestr = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M'))
@@ -200,11 +196,8 @@ def main(args):
     log_string('Load dataset ...')
     args.num_class = 3
     args.dataset = 'SanLim'
-    args.normal = True
-    # aug_args = get_aug_args(args)
-    DATA_PATH = os.path.join(args.data_dir, 'Tree')
-    TRAIN_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=DATA_PATH, split='train')
-    VALID_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=DATA_PATH, split='val')
+    TRAIN_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='train')
+    VALID_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='val')
     trainDataLoader = torch.utils.data.DataLoader(TRAIN_DATASET, batch_size=args.batch_size, shuffle=True,
                                                   num_workers=args.n_workers, drop_last=True)
     validDataLoader = torch.utils.data.DataLoader(VALID_DATASET, batch_size=args.batch_size, shuffle=False,
