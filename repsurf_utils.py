@@ -1,9 +1,12 @@
+import sys
+sys.path.append('./RepSurf')
+
 import torch
 import torch.nn as nn
 
-from RepSurf.modules.pointnet2_utils import farthest_point_sample, index_points, query_knn_point, query_ball_point
-from RepSurf.modules.polar_utils import xyz2sphere
-from RepSurf.modules.recons_utils import cal_const, cal_normal, cal_center, check_nan_umb
+from modules.pointnet2_utils import farthest_point_sample, index_points, query_knn_point, query_ball_point
+from modules.polar_utils import xyz2sphere
+from modules.recons_utils import cal_const, cal_normal, cal_center, check_nan_umb
 
 
 def sample_and_group(npoint, radius, nsample, center, normal, feature, return_normal=True, return_polar=False, cuda=False):
