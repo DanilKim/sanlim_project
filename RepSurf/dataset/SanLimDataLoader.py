@@ -7,14 +7,11 @@ warnings.filterwarnings('ignore')
 
 class SanLimDataLoader(Dataset):
   def __init__(self, root, num_sample, split='train', bg=True):
-    # assert (split == 'train' or split == 'test')
     self.root_dir = root
     self.n = num_sample
-    self.list_dir = os.path.join(self.root_dir, 'datalist/sanlim_{}samples'.format(self.n))
+    self.list_dir = '../datalist'
     self.data_dir = os.path.join(self.root_dir, 'sanlim_crop_100_npy')
-    # self.data_dir = os.path.join(self.root_dir, 'sanlim_npy')
-    txt = os.path.join(self.list_dir, 'sanlim_{}samples_{}_crop100.csv'.format(self.n, split))
-    # txt = os.path.join(self.list_dir, 'sanlim_{}samples_{}.csv'.format(self.n, split))
+    txt = os.path.join(self.list_dir, '{}_crop100.csv'.format(split))
     with open(txt, 'r') as f:
       files = f.read().split('\n')[:-1]
     
@@ -56,8 +53,4 @@ class SanLimDataLoader(Dataset):
     label = int(self.classes[label])
     
     text = np.load('{}/{}'.format(self.data_dir, self.files[index])).astype(np.float32)
-    # text = np.load('{}/{}.npy'.format(self.data_dir, self.files[index])).astype(np.float32)
-    
-    # idx = np.random.choice(text.shape[0], 4096, replace=False)
-    # return text[idx, :].T, label, name
     return text.T, label, name
