@@ -30,8 +30,6 @@ def parse_arg():
     parser.add_argument('--split', type=str, default='test')
 
     ## hyperparameters ##
-    parser.add_argument('--num_samples', type=int, default=2500)
-    parser.add_argument('--num_crops', type=int, default=100)
     parser.add_argument('--K', type=int, default=6)
     parser.add_argument('--L', type=int, default=8)
     parser.add_argument('--num_points', type=int, default=516, 
@@ -41,7 +39,7 @@ def parse_arg():
 
     ## experiment settings ##
     parser.add_argument('--model', type=str, default='G3DNet18', choices=['G3DNet14', 'G3DNet18', 'G3DNet26', 'SurfG3D18'])
-    parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam'])
+    parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam'])
     parser.add_argument('--epoch', type=int, default=0, help='eval model trained until this epoch')
     parser.add_argument('--ver', type=str, default='best', choices=['best', 'latest'], help='eval model trained until this epoch')
     parser.add_argument('--batch_size', type=int, default=64)
@@ -87,7 +85,7 @@ def evaluate(cfg, epoch, model, eval_loader, save_dir, device):
                     epoch, cfg.split, 100 * float(i+1) / len(eval_loader)))     
         
         #### Per-tree evaluation by voting ####
-        with open(result_fn, 'w') as rf:
+        with open(result_fn, 'w', encoding='utf-8-sig') as rf:
             wr = csv.DictWriter(rf, delimiter=',', fieldnames=[
                 '수명', '예측결과', '실제구분', '정답여부', '투표:칩엽수', '투표:활엽수', '투표:기타수종'
             ])
@@ -105,7 +103,7 @@ def evaluate(cfg, epoch, model, eval_loader, save_dir, device):
                 })
                 if np.argmax(votes[name]) == gts[name]:
                     correct_predictions += 1
-        
+
         val_acc = 100 * float(correct_predictions) / len(votes)
         print('Overall Accuracy : {:.2f}'.format(val_acc))
 
@@ -150,13 +148,9 @@ def main():
 
     aug = '_noaug' if args.no_aug else ''
     dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    crop = '_nc' + str(args.num_crops) if args.num_crops > 0 else ''
-    exp_name = '{}_ns{}{}_{}_K{}_np{}_sW{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
-        args.model, 
-        args.num_samples, crop, 
-        args.optimizer, 
-        args.K, args.num_points, args.subsample_W, 
-        args.batch_size, args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
+    exp_name = '{}_{}_K{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+        args.model, args.optimizer, args.K, args.num_points, args.batch_size, 
+        args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
     )
     save_dir = os.path.join(args.snapshot_root, exp_name)
 
