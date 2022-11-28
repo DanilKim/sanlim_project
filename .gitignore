@@ -1,0 +1,8 @@
+.vscode
+__pycache__
+.zcompdump
+datalist/*
+preprocess/sanlim_las_arrange.ipynb
+sanlim_project.code-workspace
+debug
+RepSurf/log/*

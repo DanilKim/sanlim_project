@@ -1,0 +1,18 @@
+PATH:
+  list_root: './datalist'
+  data_root: '/data'
+  snapshot_root: '/data/snapshot'
+  summary_root: '/data/summary'
+DATA:
+  num_samples: 2500
+  num_crops: 900
+  num_points: 516
+  subsample_W: 0.01
+EXP:
+  K: 6
+  max_epoch: 100
+  batch_size: 64
+  learning_rate: 0.001
+  learning_rate_step: 3
+RANDOM:
+  seed: 0
