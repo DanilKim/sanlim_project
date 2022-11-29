@@ -45,8 +45,6 @@ def parse_arg():
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--learning_rate_step', type=int, default=0)
     parser.add_argument('--l2', type=float, default=0)
-    parser.add_argument('--dropout', type=float, default=0)
-    parser.add_argument('--no_aug', action='store_true')
     parser.add_argument('--print_every_iter', type=int, default=50, help='num iterations to print periodically')
     
     ## random ##
@@ -144,11 +142,9 @@ def extract_feature(cfg, epoch, model, eval_loader, save_dir, device):
 def main():
     args = parse_arg()
 
-    aug = '_noaug' if args.no_aug else ''
-    dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}'.format(
         args.model, args.optimizer, args.num_points, args.batch_size, 
-        args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
+        args.learning_rate, args.learning_rate_step, args.l2
     )
     save_dir = os.path.join(args.snapshot_root, exp_name)
 
@@ -177,7 +173,7 @@ def main():
 
     print()
     print('Defining GraphCNN Network, Loss, Optimizer...\n')
-    #model = getattr(m, args.model)(args.num_points, args.L, 3, args.dropout)
+    #model = getattr(m, args.model)(args.num_points, args.L, 3, 0)
 
     model_path = os.path.join(save_dir, 'checkpoints/{}.pt'.format(args.ver))
     checkpoint = torch.load(model_path, map_location=device)

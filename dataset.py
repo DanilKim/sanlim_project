@@ -19,7 +19,7 @@ class TreePCDDataset(Dataset):
         self.n_points = cfg.num_points
         self.data_root = cfg.data_root
         self.K = cfg.K
-        self.aug = not cfg.no_aug
+        self.aug = True
         self.pooler = LloydPoolingPyramid(4, GeometricAdjacencyCompander, [0.5]*4)
 
         self.data_list_file = os.path.join(cfg.list_root, self.split + '_crop.csv')
