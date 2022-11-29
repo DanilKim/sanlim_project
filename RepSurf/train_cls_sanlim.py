@@ -68,7 +68,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1):
+def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1, logger=None):
     vote_correct = 0
     sing_correct = 0
     classifier = model.eval()
@@ -139,9 +139,9 @@ def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1):
         print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
         # print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
     
-    print('----single prediction error list----')
-    for key in sing_err:
-        print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
+    # print('----single prediction error list----')
+    # for key in sing_err:
+    #     print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
     # print('----vote prediction error list----')
     # for key in vote_err:
     #     print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
