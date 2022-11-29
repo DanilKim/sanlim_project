@@ -148,8 +148,8 @@ def main():
 
     aug = '_noaug' if args.no_aug else ''
     dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    exp_name = '{}_{}_K{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
-        args.model, args.optimizer, args.K, args.num_points, args.batch_size, 
+    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+        args.model, args.optimizer, args.num_points, args.batch_size, 
         args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
     )
     save_dir = os.path.join(args.snapshot_root, exp_name)

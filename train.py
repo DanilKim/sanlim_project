@@ -32,12 +32,10 @@ def parse_arg():
     parser.add_argument('--L', type=int, default=8)
     parser.add_argument('--num_points', type=int, default=516, 
                         help='number of input points in a tree sample.')
-    parser.add_argument('--subsample_W', type=float, default=0.01, 
-                        help='grid subsampling width. set to 0 if not subsampled')
 
     ## experiment settings ##
-    parser.add_argument('--model', type=str, default='G3DNet18', choices=['G3DNet18', 'SurfG3D18'])
-    parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam'])
+    parser.add_argument('--model', type=str, default='SurfG3D18', choices=['G3DNet18', 'SurfG3D18'])
+    parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam'])
     parser.add_argument('--resume', action='store_true', help='resume from latest epoch')
     parser.add_argument('--ckpt_path', type=str, default='', help='finetune from designated model checkpoint')
     parser.add_argument('--max_epoch', type=int, default=100)
@@ -167,8 +165,8 @@ def main():
 
     aug = '_noaug' if args.no_aug else ''
     dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    exp_name = '{}_{}_K{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
-        args.model, args.optimizer, args.K, args.num_points, args.batch_size, 
+    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+        args.model, args.optimizer, args.num_points, args.batch_size, 
         args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
     )
 
