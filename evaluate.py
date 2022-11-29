@@ -44,7 +44,7 @@ def parse_arg():
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--learning_rate_step', type=int, default=0)
-    parser.add_argument('--l2', type=float, default=0)
+    parser.add_argument('--l2', type=float, default=0.0)
     parser.add_argument('--print_every_iter', type=int, default=50, help='num iterations to print periodically')
     
     ## random ##
