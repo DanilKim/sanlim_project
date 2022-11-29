@@ -32,9 +32,9 @@ for i, file in enumerate(filelist):
   name = filename.split('.')[0]
   tdir = os.path.join(tree_dir, classname)
 
-  # if os.path.exists(os.path.join(tdir, name+'.pickle')):
-  #  print('[{}/{}] Already processed {} - skip...'.format(i+1, len(filelist), name))
-  #  continue
+  if os.path.exists(os.path.join(tdir, name+'.pickle')):
+   print('[{}/{}] Already processed {} - skip...'.format(i+1, len(filelist), name))
+   continue
 
   print('[{}/{}] Processing {}...'.format(i+1, len(filelist), name))
   sdir = os.path.join(save_dir, classname)
