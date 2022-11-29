@@ -26,7 +26,6 @@ def parse_args():
     """PARAMETERS"""
     parser = argparse.ArgumentParser('RepSurf')
     # Basic
-    parser.add_argument('--log_dir', type=str, default=None, help='experiment root')
     parser.add_argument('--data_dir', type=str, default='/data', help='data dir')
     parser.add_argument('--log_root', type=str, default='/data/snapshot', help='log root dir')
     parser.add_argument('--model', default='repsurf.scanobjectnn.repsurf_ssg_umb',
@@ -34,7 +33,6 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=2800, help='Training Seed')
     parser.add_argument('--cuda_ops', action='store_true', default=False,
                         help='Whether to use cuda version operations [default: False]')
-    parser.add_argument('--num_sample', type=int, default=2500)
 
     # Training
     parser.add_argument('--batch_size', type=int, default=256, help='batch size in training [default: 64]')
@@ -70,7 +68,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1):
+def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1, logger=None):
     vote_correct = 0
     sing_correct = 0
     classifier = model.eval()
@@ -141,9 +139,9 @@ def test(model, loader, num_class=3, num_point=1024, num_votes=1, total_num=1):
         print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
         # print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
     
-    print('----single prediction error list----')
-    for key in sing_err:
-        print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
+    # print('----single prediction error list----')
+    # for key in sing_err:
+    #     print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
     # print('----vote prediction error list----')
     # for key in vote_err:
     #     print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
@@ -169,11 +167,9 @@ def main(args):
     '''CREATE DIR'''
     experiment_dir = Path(args.log_root)
     experiment_dir.mkdir(exist_ok=True)
-    if args.log_dir is None:
-        timestr = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M'))
-        experiment_dir = experiment_dir.joinpath(timestr)
-    else:
-        experiment_dir = experiment_dir.joinpath(args.log_dir)
+    log_dir = 'RepSurf_{}_np{}_bs{}_lr{}_dr{}_ds{}'\
+        .format(args.optimizer, args.num_point, args.batch_size, args.learning_rate, args.decay_rate, args.decay_step)
+    experiment_dir = experiment_dir.joinpath(log_dir)
     experiment_dir.mkdir(exist_ok=True)
     checkpoints_dir = experiment_dir.joinpath('checkpoints/')
     checkpoints_dir.mkdir(exist_ok=True)
@@ -196,8 +192,8 @@ def main(args):
     log_string('Load dataset ...')
     args.num_class = 3
     args.dataset = 'SanLim'
-    TRAIN_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='train')
-    VALID_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='val')
+    TRAIN_DATASET = SanLimDataLoader(root=args.data_dir, split='train')
+    VALID_DATASET = SanLimDataLoader(root=args.data_dir, split='val')
     trainDataLoader = torch.utils.data.DataLoader(TRAIN_DATASET, batch_size=args.batch_size, shuffle=True,
                                                   num_workers=args.n_workers, drop_last=True)
     validDataLoader = torch.utils.data.DataLoader(VALID_DATASET, batch_size=args.batch_size, shuffle=False,
