@@ -26,7 +26,6 @@ def parse_args():
     """PARAMETERS"""
     parser = argparse.ArgumentParser('RepSurf')
     # Basic
-    parser.add_argument('--log_dir', type=str, default=None, help='experiment root')
     parser.add_argument('--data_dir', type=str, default='/data', help='data dir')
     parser.add_argument('--log_root', type=str, default='/data/snapshot', help='log root dir')
     parser.add_argument('--model', default='repsurf.scanobjectnn.repsurf_ssg_umb',
@@ -34,7 +33,6 @@ def parse_args():
     parser.add_argument('--seed', type=int, default=2800, help='Training Seed')
     parser.add_argument('--cuda_ops', action='store_true', default=False,
                         help='Whether to use cuda version operations [default: False]')
-    parser.add_argument('--num_sample', type=int, default=2500)
 
     # Training
     parser.add_argument('--batch_size', type=int, default=256, help='batch size in training [default: 64]')
@@ -70,7 +68,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def test(model, loader, log_dir, num_class=3, num_point=1024, num_votes=1, total_num=1):
+def test(model, loader, log_dir, num_class=3, num_point=1024, num_votes=1, total_num=1, logger=None):
     vote_correct = 0
     sing_correct = 0
     classifier = model.eval()
@@ -139,16 +137,16 @@ def test(model, loader, log_dir, num_class=3, num_point=1024, num_votes=1, total
                 vote_cnt += 1
             else:
                 vote_err.append(key)
-            print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
+            logger.info('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
             f.write('{}: {}, {}, {}\n'.format(key, *sing_pred_dict[key]))
             # print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
     
-    print('----single prediction error list----')
-    for key in sing_err:
-        print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
-    print('----vote prediction error list----')
-    for key in vote_err:
-        print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
+    # print('----single prediction error list----')
+    # for key in sing_err:
+    #     print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
+    # print('----vote prediction error list----')
+    # for key in vote_err:
+    #     print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
         
     total_num = len(sing_pred_dict)
     sing_acc = sing_cnt / total_num
@@ -170,11 +168,9 @@ def main(args):
 
     '''CREATE DIR'''
     experiment_dir = Path(args.log_root)
-    if args.log_dir is None:
-        timestr = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M'))
-        experiment_dir = experiment_dir.joinpath(timestr)
-    else:
-        experiment_dir = experiment_dir.joinpath(args.log_dir)
+    log_dir = 'RepSurf_{}_np{}_bs{}_lr{}_dr{}_ds{}'\
+        .format(args.optimizer, args.num_point, args.batch_size, args.learning_rate, args.decay_rate, args.decay_step)
+    experiment_dir = experiment_dir.joinpath(log_dir)
     checkpoints_dir = experiment_dir.joinpath('checkpoints/')
     log_dir = experiment_dir.joinpath('logs/')
 
@@ -183,7 +179,7 @@ def main(args):
     logger = logging.getLogger("Model")
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    file_handler = logging.FileHandler('%s/%s.txt' % (log_dir, args.model))
+    file_handler = logging.FileHandler('%s/%s_test.txt' % (log_dir, args.model))
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
@@ -194,7 +190,7 @@ def main(args):
     log_string('Load dataset ...')
     args.num_class = 3
     args.dataset = 'SanLim'
-    TEST_DATASET = SanLimDataLoader(num_sample=args.num_sample, root=args.data_dir, split='test')
+    TEST_DATASET = SanLimDataLoader(root=args.data_dir, split='test')
     testDataLoader = torch.utils.data.DataLoader(TEST_DATASET, batch_size=args.batch_size, shuffle=False,
                                                  num_workers=args.n_workers)
 
@@ -234,7 +230,7 @@ def main(args):
     
     with torch.no_grad():
         sing_acc, vote_acc = test(classifier.eval(), testDataLoader, log_dir, num_class=args.num_class, num_point=args.num_point,
-                                    total_num=len(TEST_DATASET))
+                                    total_num=len(TEST_DATASET), logger=logger)
 
         if sing_acc >= best_sing_acc:
             best_sing_acc = sing_acc
@@ -242,10 +238,10 @@ def main(args):
             best_vote_acc = vote_acc
             #best_epoch = epoch + 1
 
-        print('Test Single Accuracy: %.2f' % (sing_acc * 100))
-        print('Best Single Accuracy: %.2f' % (best_sing_acc * 100))
-        print('Test Vote Accuracy: %.2f' % (vote_acc * 100))
-        print('Best Vote Accuracy: %.2f' % (best_vote_acc * 100))
+        log_string('Test Single Accuracy: %.2f' % (sing_acc * 100))
+        log_string('Best Single Accuracy: %.2f' % (best_sing_acc * 100))
+        log_string('Test Vote Accuracy: %.2f' % (vote_acc * 100))
+        log_string('Best Vote Accuracy: %.2f' % (best_vote_acc * 100))
 
 
 if __name__ == '__main__':
