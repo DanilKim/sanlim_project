@@ -26,7 +26,6 @@ def parse_args():
     """PARAMETERS"""
     parser = argparse.ArgumentParser('RepSurf')
     # Basic
-    parser.add_argument('--log_dir', type=str, default=None, help='experiment root')
     parser.add_argument('--data_dir', type=str, default='/data', help='data dir')
     parser.add_argument('--log_root', type=str, default='/data/snapshot', help='log root dir')
     parser.add_argument('--model', default='repsurf.scanobjectnn.repsurf_ssg_umb',
@@ -169,11 +168,9 @@ def main(args):
 
     '''CREATE DIR'''
     experiment_dir = Path(args.log_root)
-    if args.log_dir is None:
-        timestr = str(datetime.datetime.now().strftime('%Y-%m-%d_%H-%M'))
-        experiment_dir = experiment_dir.joinpath(timestr)
-    else:
-        experiment_dir = experiment_dir.joinpath(args.log_dir)
+    log_dir = 'RepSurf_{}_np{}_bs{}_lr{}_dr{}_ds{}'\
+        .format(args.optimizer, args.num_point, args.batch_size, args.learning_rate, args.decay_rate, args.decay_step)
+    experiment_dir = experiment_dir.joinpath(log_dir)
     checkpoints_dir = experiment_dir.joinpath('checkpoints/')
     log_dir = experiment_dir.joinpath('logs/')
 
