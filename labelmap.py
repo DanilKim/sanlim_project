@@ -1,6 +1,6 @@
 def label_to_kind():
 
-    l2k = {
+    label2kind = {
         'AC': 'bl', 'AG': 'bl', 'AH': 'nl', 'AP': 'bl', 'CA': 'bl', 'CC': 'bl', 'CEJ': 'bl', 'CHP': 'nl',
         'CK': 'bl', 'CMP': 'bl', 'CO': 'bl', 'CP': 'nl', 'STJ': 'bl', 'PR': 'nl',
         'QQ': 'bl', 'LL': 'nl', 'TB': 'nl', 'GB': 'nl', 'ZS': 'bl', 'QV': 'bl', 'MP': 'bl', 'PK': 'nl', 'PD': 'nl',
@@ -24,4 +24,8 @@ def label_to_kind():
         'TS': 'bl', 'EJ': 'bl'
     }
 
-    return l2k
+    label_map = {'nl':0, 'bl':1, 'bb':2}
+    
+    inverse_label_map = {0:'침엽수', 1:'활엽수', 2:'기타수종'}
+
+    return label2kind, label_map, inverse_label_map

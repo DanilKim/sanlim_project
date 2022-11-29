@@ -2,7 +2,7 @@ import os
 import datetime
 import logging
 
-def set_logger(log_dir):
+def set_logger(log_dir, log_fn=''):
     # 로그 생성
     logger = logging.getLogger()
 
@@ -19,7 +19,11 @@ def set_logger(log_dir):
 
     # log를 파일에 출력
     os.makedirs(log_dir, exist_ok=True)
-    log_path = os.path.join(log_dir, datetime.datetime.now().strftime("%Y%m%d-%H%M%S.log"))
+    if log_fn == '':
+        log_path = os.path.join(log_dir, datetime.datetime.now().strftime("%Y%m%d-%H%M%S.log"))
+    else:
+        log_path = os.path.join(log_dir, log_fn)
+        
     print('Setting logger... Log is saved to {}'.format(log_path))
 
     file_handler = logging.FileHandler(log_path)

@@ -1,70 +1,99 @@
+import os
+import argparse
+import csv
+from logger import set_logger
+from labelmap import label_to_kind
+import pdb
 
+def parse_arg():
+    parser = argparse.ArgumentParser()
 
-label_dict = {}
-classes = {
-  'AC': 1, 'AG': 1, 'AH': 0, 'AP': 1, 'CA': 1, 'CC': 1, 'CEJ': 1, 'CHP': 0,
-  'CK': 1, 'CMP': 1, 'CO': 1, 'CP': 0, 'STJ': 1, 'PR': 0,
-  'QQ': 1, 'LL': 0, 'TB': 0, 'GB': 0, 'ZS': 1, 'QV': 1, 'MP': 1, 'PK': 0, 'PD': 0,
-  'AA': 1, 'AK': 0, 'AN': 1, 'APY': 1, 'AVE': 0, 'CHAP': 0, 'CJ': 0, 'COK': 1,
-  'CPV': 0, 'DIK': 1, 'FR': 1, 'HPD': 0, 'JU': 0, 'KP': 1, 
-  'MAG': 1, 'PAU': 1, 'PC': 1, 'PDM': 0, 'PIS': 0, 
-  'PLO': 0, 'PTA': 1, 'QA': 1, 'QS': 1, 'QV': 1, 'SA': 1, 'SP': 1,
-  'STR': 0, 'UDV': 1, 'ZZ': 1, 'ALJ': 0, 'BP': 1, 'CAJ': 1,
-  'CD': 0, 'CES': 1, 'CR': 1, 'EA': 1, 'JR': 1, 'KAS': 1, 'LI': 1,
-  'LT': 1, 'MG': 0, 'PA': 0, 'PB': 0, 'PE': 0, 'PPU': 0, 'PS': 1, 'PY': 1, 
-  'QUA': 1, 'RP': 1, 'SJ': 1, 'STY': 1, 'TX': 0, 'ZS': 1, 'AT': 1,
-  'QY': 1, 'HE': 1, 'FS': 1, 'Ul': 1, 'AHI': 1, 'UP': 1, 'EU': 1,
-  'PQ': 1, 'ABN': 0, 'CPP': 1, 'AJ': 1, 'BD': 1, 'SOA': 1, 'SO': 1,
-  'COR': 1, 'CAO': 1, 'QD': 1, 'QM': 1, 'HD': 1,
-  'TD': 1, 'CAT': 1, 'SB': 1, 'POD': 1, 'ACM': 1,
-  'CL': 1, 'TI': 1, 'IP': 1, 'AM': 1, 'CU': 0, 'BB': 2, 
-  'JM': 1, 'ACD': 1, 'CB': 1, 'AE': 1, 'PO': 1, 'DM': 1, 
-  'FM': 1, 'TV': 1, 'MAU': 1, 'PSE': 1, 'IC': 1,
-  'BS': 1, 'POC': 1, 'TN': 0, 'PHA': 1, 'BK': 1, 'PRS': 1, 'TKM':1,
-  'STO': 1, 'STP': 1, 'HC': 1, 'MT': 1, 'VA': 1, 'TSM': 1, 'CN': 1,
-  'EJ': 1, 'TS': 1
-}
-    
-g3dnet = {}
-with open('./best_41_test.csv', 'r') as f:
-  while True:
+    ## result path ##
+    parser.add_argument('--g3dnet', type=str, required=True)
+    parser.add_argument('--repsurf', type=str, required=True)
+    parser.add_argument('--snapshot_dir', type=str, default='/data/snapshot')
+    return parser.parse_args()
+
+def main(args, logger, save_dir):
+  logger.info('Start testing G3DNet18 + RepSurf model ensemble')
+
+  kind_label_map, label_map, inverse_label_map = label_to_kind()
+  label_dict = {}
+  classes = {k: label_map[v] for k, v in kind_label_map.items()}
+  right_ans = {True: 'O', False: 'X'}
+      
+  g3dnet = {}
+  with open(os.path.join(args.snapshot_dir, args.g3dnet, 'results/best.csv'), 'r', encoding='utf-8-sig') as f:
     line = f.readline()
-    if not line: break
-    name, zero, one, two = line.split(',')
-    g3dnet[name] = (int(zero), int(one), int(two))
-    label_dict[name] = classes[name.split('_')[0]]
+    while True:
+      line = f.readline()
+      if not line: break
+      name, _, _ , _, zero, one, two = line.split(',')
+      g3dnet[name] = (int(zero), int(one), int(two))
+      label_dict[name] = classes[name.split('_')[0]]
 
 
-repsurf = {}
-with open('./best.txt', 'r') as g:
-  while True:
-    line = g.readline()
-    if not line: break
-    name, num = line.split(':')
-    zero, one, two = map(int, num.split(','))
-    repsurf[name] = (zero, one, two)
+  repsurf = {}
+  with open(os.path.join(args.snapshot_dir, args.repsurf, 'logs/best.txt'), 'r') as g:
+    while True:
+      line = g.readline()
+      if not line: break
+      name, num = line.split(':')
+      zero, one, two = map(int, num.split(','))
+      repsurf[name] = (zero, one, two)
+
+  
+  cnt = {'g3dnet': 0, 'repsurf': 0, 'ensemble': 0}
+  d = {}
+  with open(os.path.join(save_dir, 'result.csv'), 'w', encoding='utf-8-sig') as rf:
+    wr = csv.DictWriter(rf, delimiter=',', fieldnames=[
+        '파일명', '예측결과', '실제구분', '정답여부', '투표:칩엽수', '투표:활엽수', '투표:기타수종'
+    ])
+    wr.writeheader()
+    logger.info('파일명 : G3DNet18 정답 여부 | Repsurf 정답 여부 | Ensemble 정답 여부 ')
+    for s in g3dnet:
+      if s in repsurf:
+        g3dnet_result = g3dnet[s].index(max(g3dnet[s]))
+        repsurf_result = repsurf[s].index(max(repsurf[s]))
+        ensemble = [g + r for g, r in zip(g3dnet[s], repsurf[s])]
+        ensemble_result = ensemble.index(max(ensemble))
+
+        wr.writerow({
+            '파일명': name,
+            '예측결과': inverse_label_map[ensemble_result],
+            '실제구분': inverse_label_map[label_dict[s]],
+            '정답여부': right_ans[ensemble_result == label_dict[s]],
+        })
+
+        g3dnet_result = (g3dnet_result == label_dict[s])
+        repsurf_result = (repsurf_result == label_dict[s])
+        ensemble_result = (ensemble_result == label_dict[s])
+        if g3dnet_result: cnt['g3dnet'] += 1
+        if repsurf_result: cnt['repsurf'] += 1
+        if ensemble_result: cnt['ensemble'] += 1
+        print('{}: {}, {}, {}'.format(s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]))
+        logger.info('{}:      {}      |      {}      |      {}     '.format(
+            s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]
+        ))
+        try:
+          d[(g3dnet_result, repsurf_result, ensemble_result)] += 1
+        except:
+          d[(g3dnet_result, repsurf_result, ensemble_result)] = 1
+
+    logger.info('--------- 성능 평가 ---------')
+    #logger.info('TP : {} | FP : {} | TN : {} | FN : {}')
+    logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / len(label_dict.keys())))
+
+    print(d)
+    print(cnt)
 
 
-cnt = {'g3dnet': 0, 'repsurf': 0, 'ensemble': 0}
-d = {}
-for s in g3dnet:
-  if s in repsurf:
-    g3dnet_result = g3dnet[s].index(max(g3dnet[s]))
-    repsurf_result = repsurf[s].index(max(repsurf[s]))
-    ensemble = [g + r for g, r in zip(g3dnet[s], repsurf[s])]
-    ensemble_result = ensemble.index(max(ensemble))
-    g3dnet_result = (g3dnet_result == label_dict[s])
-    repsurf_result = (repsurf_result == label_dict[s])
-    ensemble_result = (ensemble_result == label_dict[s])
-    if g3dnet_result: cnt['g3dnet'] += 1
-    if repsurf_result: cnt['repsurf'] += 1
-    if ensemble_result: cnt['ensemble'] += 1
-    print('{}: {}, {}, {}'.format(s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]))
-    try:
-      d[(g3dnet_result, repsurf_result, ensemble_result)] += 1
-    except:
-      d[(g3dnet_result, repsurf_result, ensemble_result)] = 1
-    
-print(d)
-print(cnt)
+if __name__ == "__main__":
+  args = parse_arg()
 
+  save_dir = os.path.join(args.snapshot_dir, 'ensemble')
+  os.makedirs(save_dir, exist_ok=True)
+  logger = set_logger(save_dir, 'test.log')
+
+  logger.info('+++++++++++++++++++++++++++++++')
+  main(args, logger, save_dir)

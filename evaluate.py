@@ -38,9 +38,8 @@ def parse_arg():
                         help='grid subsampling width. set to 0 if not subsampled')
 
     ## experiment settings ##
-    parser.add_argument('--model', type=str, default='G3DNet18', choices=['G3DNet14', 'G3DNet18', 'G3DNet26', 'SurfG3D18'])
+    parser.add_argument('--model', type=str, default='SurfG3D18', choices=['G3DNet18', 'SurfG3D18'])
     parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam'])
-    parser.add_argument('--epoch', type=int, default=0, help='eval model trained until this epoch')
     parser.add_argument('--ver', type=str, default='best', choices=['best', 'latest'], help='eval model trained until this epoch')
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--learning_rate', type=float, default=0.001)
@@ -62,10 +61,9 @@ def evaluate(cfg, epoch, model, eval_loader, save_dir, device):
     label_map = eval_loader.dataset.inverse_label_map
     right_ans = {True: 'O', False: 'X'}
 
-    result_dir = os.path.join(save_dir, 'result')
+    result_dir = os.path.join(save_dir, 'results')
     os.makedirs(result_dir, exist_ok=True)
-    result_fn = os.path.join(result_dir, cfg.ver+'_'+epoch+'_'+cfg.split+'.csv')
-    #result_fn = os.path.join(result_dir, epoch+'_'+cfg.split+'.csv')
+    result_fn = os.path.join(result_dir, cfg.ver+'.csv')
 
     with torch.no_grad():
         #### Evaluation Iterations ####
@@ -112,7 +110,7 @@ def extract_feature(cfg, epoch, model, eval_loader, save_dir, device):
     print('Start extractring features from Epoch ' + epoch)
     model.eval()
 
-    result_dir = os.path.join(save_dir, 'feature')
+    result_dir = os.path.join(save_dir, 'features')
     os.makedirs(result_dir, exist_ok=True)
     result_fn = os.path.join(result_dir, cfg.ver+'_'+epoch+'.npy')
 
@@ -154,9 +152,7 @@ def main():
     )
     save_dir = os.path.join(args.snapshot_root, exp_name)
 
-    ep = str(args.epoch) if args.epoch > 0 else 'best'
-    print('Evaluate Experiment {} for {} epoch.'.format(exp_name, ep))
-    #print('Evaluate Experiment {} for the {} epoch.'.format(exp_name, args.ver))
+    print('Evaluate Experiment {} for the {} epoch.'.format(exp_name, args.ver))
 
     print('Configs are:')
     print('{}'.format(args))
@@ -183,8 +179,7 @@ def main():
     print('Defining GraphCNN Network, Loss, Optimizer...\n')
     #model = getattr(m, args.model)(args.num_points, args.L, 3, args.dropout)
 
-    model_name = 'epoch_' + str(args.epoch) if args.epoch > 0 else args.ver
-    model_path = os.path.join(save_dir, '{}.pt'.format(model_name))
+    model_path = os.path.join(save_dir, 'checkpoints/{}.pt'.format(args.ver))
     checkpoint = torch.load(model_path, map_location=device)
     #model.load_state_dict(checkpoint)
     #model.load_state_dict(checkpoint['model_state_dict'])
