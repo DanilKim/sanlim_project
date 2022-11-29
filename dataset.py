@@ -28,9 +28,7 @@ class TreePCDDataset(Dataset):
         with open(self.data_list_file, 'r') as df:
             self.data_list = df.readlines()
 
-        self.kind_label_map = label_to_kind()
-        self.label_map = {'nl':0, 'bl':1, 'bb':2}
-        self.inverse_label_map = {0:'침엽수', 1:'활엽수', 2:'기타수종'}
+        self.kind_label_map, self.label_map, self.inverse_label_map = label_to_kind()
 
         print('Tree PCD {} dataset with {} cropped samples loaded'.format(self.split, len(self.data_list)))
 

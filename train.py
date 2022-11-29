@@ -110,16 +110,13 @@ def train(cfg, model, logger, train_loader, val_loader, criterion, optimizer, sa
         if val_acc > best_acc:
             best_acc = val_acc
             logger.info('Best Accuracy @ Epoch {}, Acc {:.3f}%! '.format(epoch, 100 * best_acc))
-            save_fn = os.path.join(save_dir, 'best.pt')
+            save_fn = os.path.join(save_dir, 'checkpoints/best.pt')
             print('Saving Best Model to {}'.format(save_fn))
             save_model(model, epoch, best_acc, save_fn)
 
         #### Save Single Epoch Model ####
-        save_fn = os.path.join(save_dir, 'latest.pt')
+        save_fn = os.path.join(save_dir, 'checkpoints/latest.pt')
         print('Saving Latest Model @ Epoch {} to {} ...\n'.format(epoch, save_fn))
-        save_model(model, epoch, best_acc, save_fn)
-        ### Dummy Saving ###
-        save_fn = os.path.join(save_dir, 'epoch_{}.pt'.format(epoch))
         save_model(model, epoch, best_acc, save_fn)
 
         #### Drop Learning Rate ####
@@ -210,7 +207,7 @@ def main():
     if args.ckpt_path != '':
         model, args.start_epoch, args.best_acc = load_model(args.ckpt_path, device)
     elif args.resume:
-        model, args.start_epoch, args.best_acc = load_model(os.path.join(save_dir, 'latest.pt'), device)
+        model, args.start_epoch, args.best_acc = load_model(os.path.join(save_dir, 'checkpoints/latest.pt'), device)
     else:
         args.start_epoch, args.best_acc = 1, 0
 
