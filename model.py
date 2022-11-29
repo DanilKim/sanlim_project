@@ -78,37 +78,6 @@ class Block(nn.Module):
     return V, A
 
 
-class G3DNet14(nn.Module):
-  def __init__(self, no, no_A, no_features=3, dropout=0):
-    super(G3DNet14, self).__init__()
-    self.no = no
-    self.no_A = no_A
-    self.no_features = no_features
-    self.Block_128 = Block(no, no_A, no_features, 128, 0)
-    self.Block_256 = Block(no//2, no_A, 128, 256, 1)
-    self.Block_512 = Block(no//4, no_A, 256, 512, 2)
-    self.flatten = nn.Flatten()
-    self.fc_2048 = nn.Linear((no//8)*512, 1024)
-    self.bn = nn.BatchNorm1d(1024)
-    self.relu = nn.ReLU()
-    self.do = nn.Dropout(dropout)
-    self.fc_3 = nn.Linear(1024, 3)
-
-  def forward(self, V, A, P=None):
-    
-    V, A = self.Block_128(V, A, P)
-    V, A = self.Block_256(V, A, P)
-    V, A = self.Block_512(V, A, P)
-    logits = self.flatten(V)
-    logits = self.fc_2048(logits)
-    logits = self.bn(logits)
-    logits = self.relu(logits)
-    logits = self.do(logits)
-    logits = self.fc_3(logits)
-    
-    return logits
-
-
 class G3DNet18(nn.Module):
   def __init__(self, no, no_A, no_features=3, dropout=0):
     super(G3DNet18, self).__init__()

@@ -166,13 +166,19 @@ def check_nan_umb(normal, center, pos=None):
     b_idx = torch.arange(B).unsqueeze(1).repeat([1, N])
     n_idx = torch.arange(N).unsqueeze(0).repeat([B, 1])
 
-    normal_first = normal[b_idx, n_idx, None, mask_first].repeat([1, 1, G, 1])
+    normal_first = normal[b_idx, n_idx, None, mask_first]
+    remaining_nan = torch.sum(torch.isnan(normal_first), dim=-1) > 0
+    normal_first[remaining_nan] = torch.zeros_like(normal_first[remaining_nan])
+    normal_first = normal_first.repeat([1, 1, G, 1])
     normal[mask] = normal_first[mask]
+
     center_first = center[b_idx, n_idx, None, mask_first].repeat([1, 1, G, 1])
     center[mask] = center_first[mask]
 
     if pos is not None:
-        pos_first = pos[b_idx, n_idx, None, mask_first].repeat([1, 1, G, 1])
+        pos_first = pos[b_idx, n_idx, None, mask_first]
+        pos_first[remaining_nan] = torch.zeros_like(pos_first[remaining_nan])
+        pos_first = pos_first.repeat([1, 1, G, 1])
         pos[mask] = pos_first[mask]
         return normal, center, pos
     return normal, center

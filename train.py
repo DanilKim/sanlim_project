@@ -28,18 +28,14 @@ def parse_arg():
     parser.add_argument('--summary_root', type=str, default='/data/summary')
 
     ## hyperparameters ##
-    parser.add_argument('--num_samples', type=int, default=2500)
-    parser.add_argument('--num_crops', type=int, default=100)
     parser.add_argument('--K', type=int, default=6)
     parser.add_argument('--L', type=int, default=8)
     parser.add_argument('--num_points', type=int, default=516, 
                         help='number of input points in a tree sample.')
-    parser.add_argument('--subsample_W', type=float, default=0.01, 
-                        help='grid subsampling width. set to 0 if not subsampled')
 
     ## experiment settings ##
-    parser.add_argument('--model', type=str, default='G3DNet18', choices=['G3DNet14', 'G3DNet18', 'G3DNet26', 'SurfG3D18'])
-    parser.add_argument('--optimizer', type=str, default='SGD', choices=['SGD', 'Adam'])
+    parser.add_argument('--model', type=str, default='SurfG3D18', choices=['G3DNet18', 'SurfG3D18'])
+    parser.add_argument('--optimizer', type=str, default='Adam', choices=['SGD', 'Adam'])
     parser.add_argument('--resume', action='store_true', help='resume from latest epoch')
     parser.add_argument('--ckpt_path', type=str, default='', help='finetune from designated model checkpoint')
     parser.add_argument('--max_epoch', type=int, default=100)
@@ -169,10 +165,9 @@ def main():
 
     aug = '_noaug' if args.no_aug else ''
     dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    crop = '_nc' + str(args.num_crops) if args.num_crops > 0 else ''
-    exp_name = '{}_ns{}{}_{}_K{}_np{}_sW{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
-        args.model, args.num_samples, crop, args.optimizer, args.K, args.num_points, args.subsample_W, 
-        args.batch_size, args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
+    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+        args.model, args.optimizer, args.num_points, args.batch_size, 
+        args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
     )
 
     save_dir = os.path.join(args.snapshot_root, exp_name)
