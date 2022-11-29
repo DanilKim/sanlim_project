@@ -28,13 +28,13 @@ save_dir = '/data/sanlim_crop_npy'
 filelist = glob.glob(os.path.join(root_dir, '*/*.las'))
 
 for i, file in enumerate(filelist):
-  _, _, classname, filename = file.split('/')
+  _, _, _, classname, filename = file.split('/')
   name = filename.split('.')[0]
   tdir = os.path.join(tree_dir, classname)
 
-  #if os.path.exists(os.path.join(tdir, name+'.pickle')):
-  #  print('[{}/{}] Already processed {} - skip...'.format(i+1, len(filelist), name))
-  #  continue
+  if os.path.exists(os.path.join(tdir, name+'.pickle')):
+   print('[{}/{}] Already processed {} - skip...'.format(i+1, len(filelist), name))
+   continue
 
   print('[{}/{}] Processing {}...'.format(i+1, len(filelist), name))
   sdir = os.path.join(save_dir, classname)
