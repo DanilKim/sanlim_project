@@ -25,7 +25,6 @@ def parse_arg():
     parser.add_argument('--list_root', type=str, default='./datalist')
     parser.add_argument('--data_root', type=str, default='/data')
     parser.add_argument('--snapshot_root', type=str, default='/data/snapshot')
-    parser.add_argument('--summary_root', type=str, default='/data/summary')
 
     ## hyperparameters ##
     parser.add_argument('--K', type=int, default=6)
@@ -43,8 +42,6 @@ def parse_arg():
     parser.add_argument('--learning_rate', type=float, default=0.001)
     parser.add_argument('--learning_rate_step', type=int, default=0)
     parser.add_argument('--l2', type=float, default=0)
-    parser.add_argument('--dropout', type=float, default=0)
-    parser.add_argument('--no_aug', action='store_true')
     parser.add_argument('--print_every_iter', type=int, default=200, help='num iterations to log periodically')
     
     ## random ##
@@ -160,21 +157,17 @@ def evaluation(cfg, epoch, model, logger, val_loader, device):
 def main():
     args = parse_arg()
 
-    aug = '_noaug' if args.no_aug else ''
-    dropout = '_do' + str(args.dropout) if args.dropout > 0 else ''
-    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}{}{}'.format(
+    exp_name = '{}_{}_np{}_bs{}_lr{}_lrs{}_wd{}'.format(
         args.model, args.optimizer, args.num_points, args.batch_size, 
-        args.learning_rate, args.learning_rate_step, args.l2, dropout, aug
+        args.learning_rate, args.learning_rate_step, args.l2
     )
 
     save_dir = os.path.join(args.snapshot_root, exp_name)
-    summ_dir = os.path.join(args.summary_root, exp_name)
     os.makedirs(save_dir, exist_ok=True)
-    os.makedirs(summ_dir, exist_ok=True)
+    os.makedirs(os.path.join(save_dir, 'checkpoints'))
 
     print('Start Experiment {}.'.format(exp_name))
     print('Checkpoints and logs are saved in {}'.format(save_dir))
-    print('Summaries are saved in {}\n'.format(summ_dir))
     
     print('Configs are:')
     print('{}'.format(args))
@@ -202,7 +195,7 @@ def main():
 
     print()
     print('Defining GraphCNN Network, Loss, Optimizer...\n')
-    model = getattr(m, args.model)(args.num_points, args.L, 3, args.dropout)
+    model = getattr(m, args.model)(args.num_points, args.L, 3, 0)
     model.to(device)
     if args.ckpt_path != '':
         model, args.start_epoch, args.best_acc = load_model(args.ckpt_path, device)

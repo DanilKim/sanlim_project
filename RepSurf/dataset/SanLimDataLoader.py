@@ -23,7 +23,7 @@ class SanLimDataLoader(Dataset):
       'AA': 1, 'AK': 0, 'AN': 1, 'APY': 1, 'AVE': 0, 'CHAP': 0, 'CJ': 0, 'COK': 1,
       'CPV': 0, 'DIK': 1, 'FR': 1, 'HPD': 0, 'JU': 0, 'KP': 1, 
       'MAG': 1, 'PAU': 1, 'PC': 1, 'PDM': 0, 'PIS': 0, 
-      'PLO': 0, 'PTA': 1, 'QA': 1, 'QS': 1, 'QV': 1, 'SA': 1, 'SP': 1,
+      'PLO': 0, 'PTA': 1, 'QA': 1, 'QS': 1, 'QV': 1, 'SA': 1, 'SP': 0,
       'STR': 0, 'UDV': 1, 'ZZ': 1, 'ALJ': 0, 'BP': 1, 'CAJ': 1,
       'CD': 0, 'CES': 1, 'CR': 1, 'EA': 1, 'JR': 1, 'KAS': 1, 'LI': 1,
       'LT': 1, 'MG': 0, 'PA': 0, 'PB': 0, 'PE': 0, 'PPU': 0, 'PS': 1, 'PY': 1, 

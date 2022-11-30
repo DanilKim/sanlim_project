@@ -31,7 +31,7 @@ def main(args, logger, save_dir):
       name, _, _ , _, zero, one, two = line.split(',')
       g3dnet[name] = (int(zero), int(one), int(two))
       label_dict[name] = classes[name.split('_')[0]]
-
+  num_samples = len(label_dict.keys())
 
   repsurf = {}
   with open(os.path.join(args.snapshot_dir, args.repsurf, 'logs/best.txt'), 'r') as g:
@@ -44,7 +44,7 @@ def main(args, logger, save_dir):
 
   
   cnt = {'g3dnet': 0, 'repsurf': 0, 'ensemble': 0}
-  d = {}
+  #TF = {True: 0, False:0}
   with open(os.path.join(save_dir, 'result.csv'), 'w', encoding='utf-8-sig') as rf:
     wr = csv.DictWriter(rf, delimiter=',', fieldnames=[
         '파일명', '예측결과', '실제구분', '정답여부', '투표:칩엽수', '투표:활엽수', '투표:기타수종'
@@ -75,16 +75,12 @@ def main(args, logger, save_dir):
         logger.info('{}:      {}      |      {}      |      {}     '.format(
             s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]
         ))
-        try:
-          d[(g3dnet_result, repsurf_result, ensemble_result)] += 1
-        except:
-          d[(g3dnet_result, repsurf_result, ensemble_result)] = 1
+      else:
+        print(s)
 
     logger.info('--------- 성능 평가 ---------')
-    #logger.info('TP : {} | FP : {} | TN : {} | FN : {}')
-    logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / len(label_dict.keys())))
-
-    print(d)
+    #logger.info('TP : {} | FP : {} | TN : {} | FN : {}'.format())
+    logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / num_samples))
     print(cnt)
 
 
@@ -93,7 +89,7 @@ if __name__ == "__main__":
 
   save_dir = os.path.join(args.snapshot_dir, 'ensemble')
   os.makedirs(save_dir, exist_ok=True)
-  logger = set_logger(save_dir, 'test.log')
+  logger = set_logger(save_dir)
 
   logger.info('+++++++++++++++++++++++++++++++')
   main(args, logger, save_dir)
