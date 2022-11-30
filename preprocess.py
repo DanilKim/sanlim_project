@@ -25,10 +25,13 @@ root_dir = '/data/sanlim_las'
 tree_dir = '/data/sanlim_pickle'
 #save_dir = './temp'
 save_dir = '/data/sanlim_crop_npy'
-filelist = glob.glob(os.path.join(root_dir, '*/*.las'))
+# filelist = glob.glob(os.path.join(root_dir, '*/*.las'))
+filelist = glob.glob(os.path.join(root_dir, '*.las'))
 
 for i, file in enumerate(filelist):
-  _, _, _, classname, filename = file.split('/')
+  # _, _, _, classname, filename = file.split('/')
+  _, _, _, filename = file.split('/')
+  classname = filename.split('_')[0]
   name = filename.split('.')[0]
   tdir = os.path.join(tree_dir, classname)
 
