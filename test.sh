@@ -6,7 +6,7 @@ GBS=64
 GOPT=Adam
 GLR=0.001
 LRS=0
-L2=0
+L2=0.0
 GNP=516
 
 #RepSurf 설정
