@@ -25,7 +25,6 @@ def parse_arg():
     parser.add_argument('--list_root', type=str, default='./datalist')
     parser.add_argument('--data_root', type=str, default='/data')
     parser.add_argument('--snapshot_root', type=str, default='/data/snapshot')
-    parser.add_argument('--summary_root', type=str, default='/data/summary')
 
     ## hyperparameters ##
     parser.add_argument('--K', type=int, default=6)
@@ -164,13 +163,11 @@ def main():
     )
 
     save_dir = os.path.join(args.snapshot_root, exp_name)
-    summ_dir = os.path.join(args.summary_root, exp_name)
     os.makedirs(save_dir, exist_ok=True)
-    os.makedirs(summ_dir, exist_ok=True)
+    os.makedirs(os.path.join(save_dir, 'checkpoints'))
 
     print('Start Experiment {}.'.format(exp_name))
     print('Checkpoints and logs are saved in {}'.format(save_dir))
-    print('Summaries are saved in {}\n'.format(summ_dir))
     
     print('Configs are:')
     print('{}'.format(args))

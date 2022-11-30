@@ -75,11 +75,13 @@ def main(args, logger, save_dir):
         logger.info('{}:      {}      |      {}      |      {}     '.format(
             s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]
         ))
+      else:
+        print(s)
 
     logger.info('--------- 성능 평가 ---------')
     #logger.info('TP : {} | FP : {} | TN : {} | FN : {}'.format())
     logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / num_samples))
-
+    print(cnt)
 
 
 if __name__ == "__main__":

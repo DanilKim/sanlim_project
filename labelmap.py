@@ -7,7 +7,7 @@ def label_to_kind():
         'AA': 'bl', 'AK': 'nl', 'AN': 'bl', 'APY': 'bl', 'AVE': 'nl', 'CHAP': 'nl', 'CJ': 'nl', 'COK': 'bl',
         'CPV': 'nl', 'DIK': 'bl', 'FR': 'bl', 'HPD': 'nl', 'JU': 'nl', 'KP': 'bl', 
         'MAG': 'bl', 'PAU': 'bl', 'PC': 'bl', 'PDM': 'nl', 'PIS': 'nl', 
-        'PLO': 'nl', 'PTA': 'bl', 'QA': 'bl', 'QS': 'bl', 'QV': 'bl', 'SA': 'bl', 'SP': 'bl',
+        'PLO': 'nl', 'PTA': 'bl', 'QA': 'bl', 'QS': 'bl', 'QV': 'bl', 'SA': 'bl', 'SP': 'nl',
         'STR': 'nl', 'UDV': 'bl', 'ZZ': 'bl', 'ALJ': 'nl', 'BP': 'bl', 'CAJ': 'bl',
         'CD': 'nl', 'CES': 'bl', 'CR': 'bl', 'EA': 'bl', 'JR': 'bl', 'KAS': 'bl', 'LI': 'bl',
         'LT': 'bl', 'MG': 'nl', 'PA': 'nl', 'PB': 'nl', 'PE': 'nl', 'PPU': 'nl', 'PS': 'bl', 'PY': 'bl', 
