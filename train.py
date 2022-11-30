@@ -24,7 +24,7 @@ def parse_arg():
     ## path settings ##
     parser.add_argument('--list_root', type=str, default='./datalist')
     parser.add_argument('--data_root', type=str, default='/data')
-    parser.add_argument('--snapshot_root', type=str, default='/data/snapshot')
+    parser.add_argument('--snapshot_root', type=str, default='./snapshot')
 
     ## hyperparameters ##
     parser.add_argument('--K', type=int, default=6)

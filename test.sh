@@ -19,23 +19,23 @@ EP=100
 RNP=1024
 
 
-#CUDA_VISIBLE_DEVICES=${GPU} python evaluate.py \
-#    --batch_size ${GBS} \
-#    --optimizer ${GOPT} \
-#    --learning_rate ${GLR} \
-#    --learning_rate_step ${LRS} \
-#    --l2 ${L2} \
-#    --num_points ${GNP} \
+CUDA_VISIBLE_DEVICES=${GPU} python evaluate.py \
+    --batch_size ${GBS} \
+    --optimizer ${GOPT} \
+    --learning_rate ${GLR} \
+    --learning_rate_step ${LRS} \
+    --l2 ${L2} \
+    --num_points ${GNP} \
 
 
-#CUDA_VISIBLE_DEVICES=${GPU} python RepSurf/test_cls_sanlim.py \
-#    --batch_size ${RBS} \
-#    --optimizer ${ROPT} \
-#    --epoch ${EP} \
-#    --learning_rate ${RLR} \
-#    --decay_rate ${DR} \
-#    --decay_step ${DS} \
-#    --num_point ${RNP} \
+CUDA_VISIBLE_DEVICES=${GPU} python RepSurf/test_cls_sanlim.py \
+    --batch_size ${RBS} \
+    --optimizer ${ROPT} \
+    --epoch ${EP} \
+    --learning_rate ${RLR} \
+    --decay_rate ${DR} \
+    --decay_step ${DS} \
+    --num_point ${RNP} \
 
 CUDA_VISIBLE_DEVICES=${GPU} python ensemble.py \
     --g3dnet SurfG3D18_${GOPT}_np${GNP}_bs${GBS}_lr${GLR}_lrs${LRS}_wd${L2} \

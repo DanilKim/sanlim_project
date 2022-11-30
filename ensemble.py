@@ -11,7 +11,7 @@ def parse_arg():
     ## result path ##
     parser.add_argument('--g3dnet', type=str, required=True)
     parser.add_argument('--repsurf', type=str, required=True)
-    parser.add_argument('--snapshot_dir', type=str, default='/data/snapshot')
+    parser.add_argument('--snapshot_dir', type=str, default='./snapshot')
     return parser.parse_args()
 
 def main(args, logger, save_dir):
@@ -44,13 +44,12 @@ def main(args, logger, save_dir):
 
   
   cnt = {'g3dnet': 0, 'repsurf': 0, 'ensemble': 0}
-  #TF = {True: 0, False:0}
   with open(os.path.join(save_dir, 'result.csv'), 'w', encoding='utf-8-sig') as rf:
     wr = csv.DictWriter(rf, delimiter=',', fieldnames=[
-        '파일명', '예측결과', '실제구분', '정답여부', '투표:칩엽수', '투표:활엽수', '투표:기타수종'
+        '파일명', '예측결과', '실제구분', '정답여부', '투표수:칩엽수', '투표수:활엽수', '투표수:기타수종'
     ])
     wr.writeheader()
-    logger.info('파일명 : G3DNet18 정답 여부 | Repsurf 정답 여부 | Ensemble 정답 여부 ')
+    logger.info('파일명                : G3DNet18 정답 여부 | Repsurf 정답 여부 | Ensemble 정답 여부 |')
     for s in g3dnet:
       if s in repsurf:
         g3dnet_result = g3dnet[s].index(max(g3dnet[s]))
@@ -59,10 +58,13 @@ def main(args, logger, save_dir):
         ensemble_result = ensemble.index(max(ensemble))
 
         wr.writerow({
-            '파일명': name,
+            '파일명': s,
             '예측결과': inverse_label_map[ensemble_result],
             '실제구분': inverse_label_map[label_dict[s]],
             '정답여부': right_ans[ensemble_result == label_dict[s]],
+            '투표수:칩엽수': ensemble[0], 
+            '투표수:활엽수': ensemble[1], 
+            '투표수:기타수종': ensemble[2]
         })
 
         g3dnet_result = (g3dnet_result == label_dict[s])
@@ -71,15 +73,13 @@ def main(args, logger, save_dir):
         if g3dnet_result: cnt['g3dnet'] += 1
         if repsurf_result: cnt['repsurf'] += 1
         if ensemble_result: cnt['ensemble'] += 1
-        print('{}: {}, {}, {}'.format(s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]))
-        logger.info('{}:      {}      |      {}      |      {}     '.format(
-            s, g3dnet_result, repsurf_result, ensemble_result, label_dict[s]
+        logger.info('{:20}:       {:11}|      {:11}|       {:11}|'.format(
+            s, str(g3dnet_result), str(repsurf_result), str(ensemble_result)
         ))
       else:
         print(s)
 
     logger.info('--------- 성능 평가 ---------')
-    #logger.info('TP : {} | FP : {} | TN : {} | FN : {}'.format())
     logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / num_samples))
     print(cnt)
 
