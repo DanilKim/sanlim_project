@@ -164,7 +164,7 @@ def main():
 
     save_dir = os.path.join(args.snapshot_root, exp_name)
     os.makedirs(save_dir, exist_ok=True)
-    os.makedirs(os.path.join(save_dir, 'checkpoints'))
+    os.makedirs(os.path.join(save_dir, 'checkpoints'), exist_ok=True)
 
     print('Start Experiment {}.'.format(exp_name))
     print('Checkpoints and logs are saved in {}'.format(save_dir))
