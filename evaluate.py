@@ -26,7 +26,6 @@ def parse_arg():
     parser.add_argument('--list_root', type=str, default='./datalist')
     parser.add_argument('--data_root', type=str, default='/data')
     parser.add_argument('--snapshot_root', type=str, default='/data/snapshot')
-    parser.add_argument('--summary_root', type=str, default='/data/summary')
     parser.add_argument('--split', type=str, default='test')
 
     ## hyperparameters ##
