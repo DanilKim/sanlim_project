@@ -29,6 +29,7 @@ CUDA_VISIBLE_DEVICES=${GPU} python evaluate.py \
 
 
 CUDA_VISIBLE_DEVICES=${GPU} python RepSurf/test_cls_sanlim.py \
+    --cuda_ops \
     --batch_size ${RBS} \
     --optimizer ${ROPT} \
     --epoch ${EP} \
