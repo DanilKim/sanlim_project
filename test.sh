@@ -38,6 +38,7 @@ CUDA_VISIBLE_DEVICES=${GPU} python RepSurf/test_cls_sanlim.py \
     --decay_step ${DS} \
     --num_point ${RNP} \
 
+
 CUDA_VISIBLE_DEVICES=${GPU} python ensemble.py \
     --g3dnet SurfG3D18_${GOPT}_np${GNP}_bs${GBS}_lr${GLR}_lrs${LRS}_wd${L2} \
     --repsurf RepSurf_${ROPT}_np${RNP}_bs${RBS}_lr${RLR}_dr${DR}_ds${DS} \

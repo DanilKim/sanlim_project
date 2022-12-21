@@ -68,94 +68,50 @@ def parse_args():
     return parser.parse_args()
 
 
-def test(model, loader, log_dir, num_class=3, num_point=1024, num_votes=1, total_num=1, logger=None):
-    vote_correct = 0
-    sing_correct = 0
+def test(model, loader, log_dir, num_class=3, num_point=1024, total_num=1, logger=None):
+    correct = 0
     classifier = model.eval()
-    sing_pred_dict = {}
-    vote_pred_dict = {}
-
+    pred_dict = {}
+    threshold = 0.0
+    
     for j, data in enumerate(loader):
+        percent = 100*j*loader.batch_size/len(loader.dataset)
+        if percent >= threshold:
+            print('{:.2f}% done'.format(percent))
+            threshold += 10.0
         points, target, name = data
         points, target = points.cuda(), target.cuda()
 
         # preprocess
         points = sample(num_point, points)
-
-        # vote
-        vote_pool = torch.zeros(target.shape[0], num_class).cuda()
-        for i in range(num_votes):
-            new_points = points.clone()
-            # scale
-            if i > 0:
-                new_points[:, :3] = scale_point_cloud(new_points[:, :3])
-            # predict
-            pred = classifier(new_points)
-            # single
-            if i == 0:
-                sing_pred = pred
-            # vote
-            vote_pool += pred
-        vote_pred = vote_pool / num_votes
-
-        # single pred
-        sing_pred_choice = sing_pred.data.max(1)[1]
-        sing_correct += sing_pred_choice.eq(target.long().data).cpu().sum()
-        # vote pred
-        vote_pred_choice = vote_pred.data.max(1)[1]
-        vote_correct += vote_pred_choice.eq(target.long().data).cpu().sum()
+        
+        pred = classifier(points)
+        pred_choice = pred.data.max(1)[1]
+        correct += pred_choice.eq(target.long().data).cpu().sum()
         
         # added
-        sing_list = sing_pred_choice.tolist()
-        vote_list = vote_pred_choice.tolist()
+        pred_list = pred_choice.tolist()
         
-        for j in range(len(name)):
-            key = '_'.join(name[j].split('_')[:-1])
-            if key not in sing_pred_dict:
-                sing_pred_dict[key] = [0, 0, 0]
-            if key not in vote_pred_dict:
-                vote_pred_dict[key] = [0, 0, 0]
-            sing_pred_dict[key][sing_list[j]] += 1
-            vote_pred_dict[key][vote_list[j]] += 1
+        for k in range(len(name)):
+            key = '_'.join(name[k].split('_')[:-1])
+            if key not in pred_dict:
+                pred_dict[key] = [0, 0, 0]
+            pred_dict[key][pred_list[k]] += 1
     
-    sing_cnt = 0
-    vote_cnt = 0
-    sing_err = []
-    vote_err = []
-    
+    cnt = 0
     with open(os.path.join(log_dir, 'best.txt'), 'w') as f:
-        for key in sing_pred_dict.keys():
+        for key in pred_dict.keys():
             classname = key.split('_')[0]
             corr = loader.dataset.classes[classname]
-            sing = sing_pred_dict[key].index(max(sing_pred_dict[key]))
-            vote = vote_pred_dict[key].index(max(vote_pred_dict[key]))
-            if sing == corr:
-                sing_cnt += 1
-            else:
-                sing_err.append(key)
-            if vote == corr:
-                vote_cnt += 1
-            else:
-                vote_err.append(key)
-            logger.info('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
-            f.write('{}: {}, {}, {}\n'.format(key, *sing_pred_dict[key]))
-            # print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
-    
-    # print('----single prediction error list----')
-    # for key in sing_err:
-    #     print('{}: {}, {}, {}'.format(key, *sing_pred_dict[key]))
-    # print('----vote prediction error list----')
-    # for key in vote_err:
-    #     print('{}: {}, {}, {}'.format(key, *vote_pred_dict[key]))
+            guess = pred_dict[key].index(max(pred_dict[key]))
+            if guess == corr: cnt += 1
+            logger.info('{}: {}, {}, {}'.format(key, *pred_dict[key]))
+            f.write('{}: {}, {}, {}\n'.format(key, *pred_dict[key]))
         
-    total_num = len(sing_pred_dict)
-    sing_acc = sing_cnt / total_num
-    vote_acc = vote_cnt / total_num
-    
-    # sing_acc = sing_correct.item() / total_num
-    # vote_acc = vote_correct.item() / total_num
+    total_num = len(pred_dict)
+    acc = cnt / total_num
 
-    return sing_acc, vote_acc
+    return acc
 
 
 def main(args):
@@ -223,25 +179,12 @@ def main(args):
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=args.decay_step, gamma=0.7)
     else:
         raise Exception('No Such Scheduler')
-
-    best_sing_acc = 0.0
-    best_vote_acc = 0.0
-    # loader_len = len(trainDataLoader)
     
     with torch.no_grad():
-        sing_acc, vote_acc = test(classifier.eval(), testDataLoader, log_dir, num_class=args.num_class, num_point=args.num_point,
+        acc = test(classifier.eval(), testDataLoader, log_dir, num_class=args.num_class, num_point=args.num_point,
                                     total_num=len(TEST_DATASET), logger=logger)
 
-        if sing_acc >= best_sing_acc:
-            best_sing_acc = sing_acc
-        if vote_acc >= best_vote_acc:
-            best_vote_acc = vote_acc
-            #best_epoch = epoch + 1
-
-        log_string('Test Single Accuracy: %.2f' % (sing_acc * 100))
-        log_string('Best Single Accuracy: %.2f' % (best_sing_acc * 100))
-        log_string('Test Vote Accuracy: %.2f' % (vote_acc * 100))
-        log_string('Best Vote Accuracy: %.2f' % (best_vote_acc * 100))
+        log_string('Test Accuracy: %.2f' % (acc * 100))
 
 
 if __name__ == '__main__':
