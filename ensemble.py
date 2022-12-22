@@ -79,8 +79,11 @@ def main(args, logger, save_dir):
       else:
         print(s)
 
-    logger.info('--------- 성능 평가 ---------')
-    logger.info('Overall Accuracy (OA) : {:.2f}%'.format(100 * cnt['ensemble'] / num_samples))
+    logger.info('--------- 성능 평가 : Overall Accuracy (OA) ---------')
+    logger.info('G3DNet18 : {:.2f}%'.format(100 * cnt['g3dnet'] / num_samples))
+    logger.info('RepSurf  : {:.2f}%'.format(100 * cnt['repsurf'] / num_samples))
+    logger.info('----------------------------------------------------')
+    logger.info('Ensemble : {:.2f}%'.format(100 * cnt['ensemble'] / num_samples))
     print(cnt)
 
 
